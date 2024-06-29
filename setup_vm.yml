@@ -1,0 +1,59 @@
+---
+- name: Configure VM and setup image processing listener
+  hosts: my-vm
+  become: yes
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - wget
+          - google-cloud-sdk
+        update_cache: yes
+
+    - name: Install required Python packages
+      pip:
+        name: 
+          - google-cloud-pubsub
+          - google-cloud-storage
+
+    - name: Create directory for script
+      file:
+        path: /home/{{ ansible_user }}/script
+        state: directory
+        mode: '0755'
+
+    - name: Copy the notification polling script
+      copy:
+        src: imgops/notification_polling.py
+        dest: /home/{{ ansible_user }}/script/notification_polling.py
+        mode: '0755'
+
+    - name: Create systemd service for notification polling
+      copy:
+        content: |
+          [Unit]
+          Description=Google Cloud Storage Notification Polling
+          After=network.target
+
+          [Service]
+          ExecStart=/usr/bin/python3 /home/{{ ansible_user }}/script/notification_polling.py cloudz-419512 storage-subscription
+          Restart=always
+          User={{ ansible_user }}
+          Group={{ ansible_user }}
+
+          [Install]
+          WantedBy=multi-user.target
+        dest: /etc/systemd/system/notification_polling.service
+        mode: '0644'
+
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start notification polling service
+      systemd:
+        name: notification_polling
+        enabled: yes
+        state: started

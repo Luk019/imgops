@@ -13,5 +13,11 @@ RUN pip install -r requirements.txt
 # Copy the rest of the working directory contents into the container
 COPY . .
 
+# Expose the port the app runs on
+EXPOSE 8080
+
+# Set the environment variable for the port
+ENV PORT 8080
+
 # Specify the entrypoint
-CMD ["python", "imgops.py"]
+CMD ["python3", "imageops.py"]

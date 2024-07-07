@@ -59,8 +59,7 @@ gcloud storage notification create gs://bucket-cloud-zaliczenie --payload-format
     --object-name-prefix="" --event-types=OBJECT_FINALIZE
 
 # Budowa i wdrażanie aplikacji na Cloud Run
-git clone https://github.com/Luk019/imgops.git
-cd imgops/app
+cd app
 gcloud builds submit --region=us-west2 --tag gcr.io/$PROJECT_ID/image-transform .
 gcloud run deploy image-transform --image gcr.io/$PROJECT_ID/my-app --platform managed --region=europe-north1 --allow-unauthenticated
 
@@ -72,7 +71,7 @@ SERVICE_URL=$(gcloud run services describe image-transform --platform managed --
 # Utworzenie subskrypcji Pub/Sub
 gcloud pubsub subscriptions create storage-subscription --topic=storage-notify-topic
 
-cd ~
+cd ~/imgops
 
 # Generowanie pliku hosts
 cat <<EOL > hosts
